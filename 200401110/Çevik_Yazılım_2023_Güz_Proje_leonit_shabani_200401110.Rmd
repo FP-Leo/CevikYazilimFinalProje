@@ -1,0 +1,10 @@
+---
+title: "Proje Rapor : Leonit Shabani 200401110"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Q1 : Problem tanımı
+
+Şirketimiz, müşterilere film ve TV şovlarını yayınlamak için bir TV kanalı açmak isteyenlere yönelik yayın planları satmaktadır. Daha fazla müşteri çekmek için algoritmamızı geliştirmemiz gerekiyor.
