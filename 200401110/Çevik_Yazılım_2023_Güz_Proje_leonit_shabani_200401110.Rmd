@@ -12,3 +12,59 @@ output:
 # Q2 : Proje Amacı
 
 [Netflix Engagement (Jan - Jun 23) +](https://www.kaggle.com/datasets/vassyesboy/netflix-engagement-jan-jun-23) adli Kaggle veri setini kullanarak her kategorinin en iyi şovlarını bulacak ve bunlara dayanarak müşterilerimizin isteklerine uygun en iyi listeyi öneren yeni bir algoritma geliştirmeyi amaçlıyoruz. Doğru algoritmayı geliştirdikten ve doğru pazarlamayı yaptıktan sonra, şirketimizdeki trafiğin en az %25 artacağını tahmin ediyoruz.
+
+# Q3 : Veri seti keşifsel analizi
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Kodun çalışması için gereken kütüphaneleri yükle
+
+library(tidyr)
+library(dplyr)
+library(readr)
+library(stringr)
+
+# Veri dosyasını internetten indir ve git repo'sunun içine commitle
+filename <- "Netflix Engagement (plus).csv"
+
+# Dosyayi ithal et
+myDF <- read_csv(filename)
+```
+Veri seti Kaggle web sitesinden indirilmiştir ve **readr::read_csv()** fonksiyonu kullanılarak **`r class(myDF)[[1]]`** tipinde bir değişkene ithal edilmiştir. Veri boyutları aşağıdaki gibidir :
+
+- Satır sayısı : `r nrow(myDF)`
+- Sütün sayısı : `r ncol(myDF)`
+
+Veri setinin ön görsellemesi aşağıda verilmiştir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- myDF %>% distinct()
+myDF
+```
+
+Veri setini incelediğimizde, **Hours Viewed, Number of Ratings, Rating** sütunlarının bizim için uygun olan dbl türünde olduğunu görüyoruz çünkü bunları hesaplamalar için kullanacağız. **Release Date** sütunu date türündedir ve **Title, Available Globally?, Genre, Key Words, Description** sütunları tümüyle char türündedir. Hesaplamalar için **Available Globally?** sütununu, sonuç için **Title** sütununu ve **Genre** sütununu türüne göre ayrı veri kümelerine ayırmak için kullanacağız. **Key Words** sütununu kullanmayacağız çünkü orada yararlı bir bilgi yok.
+
+Aşağıdaki histogramda yıllara göre yayınlanan filmlerin/dizilerin dağılımı gösterilmektedir.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+barplot(table(na.omit(format(as.Date(myDF$`Release Date`), "%Y"))), main = "Number of Releases by Year", xlab = "Year", ylab = "Number of Releases", col = "blue")
+```
+
+Görüldüğü üzere verilerin büyük çoğunluğu 2022’den gelmektedir, bu Netflix’in Avrupa genelinde [tartışmalı kotaları](https://www.theparliamentmagazine.eu/news/article/eu-quotas-for-netflix-widely-criticised#:~:text=On%2Ddemand%20digital%20services%20like,should%20be%20made%20in%20Europe.&text=The%20European%20Commission%20has%20also,be%20given%20%22good%20visibility%22.) karşılamak için birçok belgesel, film ve dizi satın aldığından dolayıdır. 2023 verileri, sadece 2023 Haziran ayına kadar olan yayın sayısını içerdiği için eksiktir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+barplot(table(na.omit(format(as.Date(subset(myDF, format(as.Date(`Release Date`), "%Y") == "2023")$`Release Date`), "%m"))), main = "2023 Statistics - Number of Releases by Month so far", xlab = "Month", ylab = "Number of Releases", col = "blue", ylim = c(0, 100), axes = FALSE)
+axis(side = 2, at = seq(0, 100, by = 10), las = 1)
+```
+
+Yukarıdaki grafik, 2023 yılına kadar aylık olarak yapılan yayınların sayısını göstermektedir. Bu durumdan, Netflix'in 2023 yılında sürekli olarak tutarlı bir içerik sunduğu sonucuna varabiliriz.
+
+## İzlenen Saatlerin Ortamaları
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF %>%
+  mutate(Year = format(as.Date(`Release Date`), "%Y")) %>%
+  filter(Year %in% c("2021", "2022", "2023")) %>%
+  group_by(Year) %>%
+  summarise(`Average Watch Time` = mean(`Hours Viewed`, na.rm = TRUE))
+```
+
+İstatistiklere göre, Netflix izleyici sayısı 2023'ün sadece ilk 6 ayında, izlenen saatler açısından 2022'ye kıyasla neredeyse dört katına çıkmıştır.
+
