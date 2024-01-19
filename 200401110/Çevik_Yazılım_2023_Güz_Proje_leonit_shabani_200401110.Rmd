@@ -245,3 +245,14 @@ myDF
 ```
 
 Yukarıdaki tablo, en iyi derecelendirilmiş filmleri/dizi programlarını seçen yeni algoritmanın sonuçlarını göstermektedir.
+
+# Q7 : Sonuç değerlendirme, tavsiyeler
+
+Belli kategorilere ağırlık vermek, en iyi TV şovlarını/filmleri listelememizi sağlayan bir formül oluşturmamıza olanak sağladı, ancak sınırlı veri seti nedeniyle bu formül ancak bu kadar iyi olabildi. Formülü geliştirmek için daha iyi bir veri setine ihtiyaç var. Örneğin, bir sütunun Netflix orijinali olup olmadığını, bir film mi yoksa TV şovu mu olduğunu, yayınlandığı ilk çeyrekte kaç görüntüleme aldığını vb. gösteren bir veri seti. Elimizde olanla en iyisini yaptığımızı düşünüyorum. Bir başka sorun da, veri setinde çok sayıda NA değeri olması ve çok sayıda yanıltıcı bilgi bulunmasıdır. Örneğin, tüm zamanların en iyi TV şovu olarak kabul edilen klasik 'Breaking Bad', verilen hiçbir derecelendirme ve inceleme olmadığı için düşük sıralarda yer alıyor. NA değerlerine varsayılan değerler vermeyi düşündük, ancak bu, formülümüze dayanarak hiçbir şeyi değiştirmezdi. Bir şovun en iyi olarak kabul edilmesi için ortalama değerler yardımcı olmaz. Bu yüzden formülü geliştirmek isteyen herkese, istatistikleri biraz daha derinlemesine incelemelerini ve daha iyi bir veri seti bulmalarını öneririm.
+Bunlara rağmen, algoritmadan elde edilen sonuçların genellikle kamuoyuyla uyumlu olduğunu ve bu nedenle çok yararlı olduğunu düşünüyorum. İlk 10 girişin tümü, tüm zamanların en iyi filmleri olarak kabul edilen klasik filmlerdir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(testthat)
+path <- "Q1_tests_leonit_shabani_200401110.R"
+test_file(path)
+```
