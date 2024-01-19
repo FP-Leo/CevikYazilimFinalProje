@@ -112,3 +112,51 @@ myDF$Month <- as.numeric(myDF$Month)
 ```
 **Month** Sütunu oluşturuldu.
 
+# Q5 : Veri mühendisliği 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF$Quartet <- (myDF$Month-1)%/%3 + 1
+```
+Daha iyi temsil için verileri çeyreklere göre gruplandırıldı.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df_quartet <- myDF %>%
+  select(`Hours Viewed`, `Year`, `Quartet`) %>%
+  na.omit() %>%
+  group_by(Year, Quartet) %>%
+  summarise(avg_hours_watched = mean(`Hours Viewed`)) %>%
+  arrange(Year, Quartet)
+
+df_quartet <- df_quartet[!grepl("2010|2011|2012|2023", df_quartet$Year), ]
+
+colors <- rainbow(length(unique(df_quartet$Year)))
+df_quartet$Year <- as.factor(df_quartet$Year)
+color_mapping <- colors[df_quartet$Year]
+barplot(df_quartet$avg_hours_watched, 
+        main="Average Hours Watched per Quartet", 
+        xlab="Quartet", 
+        ylab="Average Hours Watched",
+        names.arg=df_quartet$Year,
+        col=color_mapping)
+```
+
+Yukarıdaki grafik, 2013'ten 2022'ye kadar her çeyrekteki ortalama izlenme saatlerini göstermektedir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+df_releases <- myDF %>%
+  select(`Year`, `Quartet`) %>%
+  na.omit() %>%
+  group_by(Year, Quartet) %>%
+  summarise(releases = n()) %>%
+  arrange(Year, Quartet)
+df_releases <- df_releases[!grepl("2010|2011|2012|2023", df_releases$Year), ]
+barplot(df_releases$releases, 
+        main="Releases per Quartet", 
+        xlab="Quartet", 
+        ylab="Releases",
+        names.arg=df_releases$Year,
+        col=color_mapping)
+```
+
+Yukarıdaki grafik, 2013'ten 2022'ye kadar her çeyrekteki sürüm sayısını göstermektedir. Görüldüğü gibi 4. çeyrekte sürüm sayısı her zaman daha yüksektir. Saatlik görüntülemelerin hangi çeyrekte daha yüksek olduğu sonucuna varmak için yeterli veri yok.
+
