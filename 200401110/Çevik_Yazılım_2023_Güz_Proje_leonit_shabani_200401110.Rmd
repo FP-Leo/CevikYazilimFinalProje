@@ -160,3 +160,88 @@ barplot(df_releases$releases,
 
 Yukarıdaki grafik, 2013'ten 2022'ye kadar her çeyrekteki sürüm sayısını göstermektedir. Görüldüğü gibi 4. çeyrekte sürüm sayısı her zaman daha yüksektir. Saatlik görüntülemelerin hangi çeyrekte daha yüksek olduğu sonucuna varmak için yeterli veri yok.
 
+# Q6 : Veri analizi 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+genreStats <- myDF %>%
+  group_by(Genre) %>%
+  summarise(avg_watch_time = mean(`Hours Viewed`, na.rm = TRUE)) %>%
+  na.omit() %>%
+  arrange(avg_watch_time)
+par(mar=c(5,6,0,0) + 2)
+par(mgp=c(6,1,0))
+barplot(genreStats$avg_watch_time, 
+        main="Average Watch Time per Genre", 
+        xlab="Genre", 
+        ylab="Average Watch Time",
+        names.arg=genreStats$Genre,
+        las=2,
+        col = "blue")
+par(mgp=c(3,1,0))
+par(mar=c(5,4,4,2) + 0.1) 
+```
+
+Türlerine göre gruplandırarak ve İzlenen Saatlerin ortalamasını alarak, en çok izlenen türleri gruplayilabilir ve final formülü geliştirilebilirdir.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- myDF %>%
+  select(-Genre)  %>%
+  distinct()
+```
+## Sütun ortamaları
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Average Hours Viewed
+HVavg <- mean(myDF$`Hours Viewed`, na.rm = TRUE)
+#Average Reviews Gotten
+NRavg <- mean(myDF$`Number of Ratings`, na.rm = TRUE)
+#Average Rating
+Ravg <- mean(myDF$`Rating`, na.rm = TRUE)
+data.frame(
+  `Average Hours Viewed` = HVavg,
+  `Average Number of Ratings` = NRavg,
+  `Average Rating` = Ravg
+)
+```
+Yukarıdaki tablo söz konusu üç sütunun ortalamalarını göstermektedir.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+genreRanking <- 1:nrow(genreStats)
+names(genreRanking) <- genreStats$Genre
+genreRanking["Unknown"] <- 0
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+testDF <- myDF %>%
+  separate(Genres, into = paste0("Genre ", seq_len(max(str_count(myDF$Genres, ",")) + 1)), sep = ",", remove = TRUE, convert = TRUE)%>%
+  select(Title, `Genre 1`, `Genre 2`, `Genre 3`)
+testDF$`Genre 1` <- sapply(testDF$`Genre 1`, function(x) if(is.character(x)) gsub("\\s", "", x) else x)
+testDF$`Genre 2` <- sapply(testDF$`Genre 2`, function(x) if(is.character(x)) gsub("\\s", "", x) else x)
+testDF$`Genre 3` <- sapply(testDF$`Genre 3`, function(x) if(is.character(x)) gsub("\\s", "", x) else x)
+testDF <- testDF %>% 
+  mutate(`Genre 1` = replace_na(`Genre 1`, "Unknown"))%>% 
+  mutate(`Genre 2` = replace_na(`Genre 2`, "Unknown"))%>%
+  mutate(`Genre 3` = replace_na(`Genre 3`, "Unknown"))%>%
+  mutate(`Genre Value` = genreRanking[`Genre 1`] + genreRanking[`Genre 2`] + genreRanking[`Genre 3`])
+testDF <- testDF %>% select(Title, `Genre Value`)
+myDF <- distinct(myDF, Title, .keep_all = TRUE)
+testDF <- distinct(testDF, Title, .keep_all = TRUE)
+myDF <- inner_join(myDF, testDF, by = "Title")
+```
+## Sonuç
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Her sütuna belirli bir değer veriyoruz. Eğer global olarak kullanılabilir değilse, ekstra puan verme kararı aldık çünkü eğer öyle olsaydı ekstra görüntü alırdı. Her kategoride ortalamanın üzerinde olanlar için ekstra puan alır. Her tür için tür sıralamasına dayalı olarak puan alır. Ne kadar yeni olursa, o kadar çok puan alır.
+
+myDF <- myDF %>% mutate(`Final Result` = `Genre Value` * 7 + 
+                          ifelse(is.na(`Quartet`), 0, `Quartet` * 3) + 
+                          ifelse(is.na(`Year`), 0, `Year` * 2) +
+                          ifelse(is.na(`Hours Viewed`) | `Hours Viewed` < HVavg, 0, (`Hours Viewed`-HVavg)*0.00001) +
+                          ifelse(is.na(`Number of Ratings`) | `Number of Ratings` < NRavg, 0, (`Number of Ratings`-NRavg)*0.01) +
+                          ifelse(is.na(`Rating`) | `Rating` < Ravg, 0, (`Rating`-Ravg)*100) +
+                          ifelse(is.na(`Available Globally?`) | `Available Globally?` == 'Yes', 0, 100))
+myDF <- myDF %>% select(Title, `Available Globally?`, `Release Date`, `Hours Viewed`, `Number of Ratings`, `Rating`, `Genres`, `Final Result`) %>% arrange(desc(`Final Result`))
+myDF
+```
+
+Yukarıdaki tablo, en iyi derecelendirilmiş filmleri/dizi programlarını seçen yeni algoritmanın sonuçlarını göstermektedir.
