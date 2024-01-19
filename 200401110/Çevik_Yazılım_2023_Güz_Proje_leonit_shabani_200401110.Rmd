@@ -68,3 +68,47 @@ myDF %>%
 
 İstatistiklere göre, Netflix izleyici sayısı 2023'ün sadece ilk 6 ayında, izlenen saatler açısından 2022'ye kıyasla neredeyse dört katına çıkmıştır.
 
+# Q4 : Veri seti ön işlemesi
+
+## Genre Sütunu
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF$Genre <- gsub("\\[|\\'|\\]", "", myDF$Genre)
+```
+**Genre** sütunu yeniden biçimlendirildi.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- myDF %>%
+  mutate(Genre = replace_na(Genre, "Unknown"))
+myDF$Genres <- myDF$Genre
+```
+Yok Değerler **Genre** sütunundan değiştirildi.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- separate_rows(myDF, 'Genre', sep = ", ")
+```
+**Genre** sütunu bölündü.
+
+## Key Words Sütunu
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- myDF[, -8]
+```
+**Key Words** Sütunu kaldırıldı.
+
+## Description Sütunu
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF <- myDF[, -8]
+```
+**Description** Sütunu kaldırıldı.
+
+## Year Sütunu
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF$Year <- format(as.Date(myDF$`Release Date`), "%Y")
+myDF$Year <- as.numeric(myDF$Year)
+```
+**Year** Sütunu oluşturuldu.
+
+## Month Sütunu
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+myDF$Month <- format(as.Date(myDF$`Release Date`), "%m")
+myDF$Month <- as.numeric(myDF$Month)
+```
+**Month** Sütunu oluşturuldu.
+
